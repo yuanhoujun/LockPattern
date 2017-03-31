@@ -3,8 +3,7 @@
 
 ## Description
 
->Imitate Alipay gesture password
-
+>The password to unlock the custom gestures
 >自定义手势密码解锁
 
 ## Starting
@@ -77,11 +76,11 @@ public void setInStealthMode(boolean inStealthMode) {
 ![仅隐藏点](http://i.imgur.com/rKWUHsE.gif)
 
 ```java
-	public void setStealthPoint(boolean stealthPoint) {
-			mStealthPoint = stealthPoint;
-		}
-	or
-	app:stealth_point="true"
+public void setStealthPoint(boolean stealthPoint) {
+		mStealthPoint = stealthPoint;
+	}
+or
+app:stealth_point="true"
 ```
 * 自定义属性
 ***
@@ -105,8 +104,9 @@ public void setInStealthMode(boolean inStealthMode) {
 
 如果你有什么问题, 或者什么建议, 可以发邮件给我.  
 Email address: wizong@126.com
+					or symwork@163.com
 
-## LICENSE
+## LICENSE	
 
     Copyright 2016 wizong
 
