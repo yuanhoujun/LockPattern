@@ -4,7 +4,7 @@
 
 Imitate Alipay gesture password
 
-仿支付宝手势密码解锁
+自定义手势密码解锁
 
 ## Starting
 
@@ -75,8 +75,8 @@ public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
 }
 ```
 
-* 可以开启绘制路径隐藏模式
-
+* 开启绘制路径隐藏模式
+ 
 ```java
 /**
  * Set whether the view is in stealth mode.  If true, there will be no
@@ -88,18 +88,27 @@ public void setInStealthMode(boolean inStealthMode) {
 }
 ```
 
+* 可以开启绘制点隐藏模式
+
+```java
+	public void setStealthPoint(boolean stealthPoint) {
+			mStealthPoint = stealthPoint;
+		}
+	or
+	app:stealth_point="true"
+```
+
 ## Example
 
-![test.gif](https://github.com/sym900728/LockPattern/blob/master/images/test.gif)
-
+![](http://i.imgur.com/2Qbh3X2.gif)
 ## Contact
 
 如果你有什么问题, 或者什么建议, 可以发邮件给我.  
-Email address: symwork@163.com
+Email address: wizong@126.com
 
 ## LICENSE
 
-    Copyright 2016 Shaoyaming
+    Copyright 2016 wizong
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
