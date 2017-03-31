@@ -67,11 +67,6 @@ public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
  ![默认显示](http://i.imgur.com/LFbhE8W.gif)
 
 ```java
-/**
- * Set whether the view is in stealth mode.  If true, there will be no
- * visible feedback as the user enters the pattern.
- * @param inStealthMode Whether in stealth mode.
- */
 public void setInStealthMode(boolean inStealthMode) {
 	mInStealthMode = inStealthMode;
 }
@@ -91,6 +86,7 @@ public void setInStealthMode(boolean inStealthMode) {
 * 自定义属性
 ***
 属性都提供各自的get和set方法
+
 | LockPatternView 属性名      |    类型 |
 | :-------- | --------:|
 | stealth_point    | boolean |
