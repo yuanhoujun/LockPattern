@@ -37,7 +37,7 @@ public class CreateGestureActivity extends Activity {
 
 	private List<LockPatternView.Cell> mChosenPattern = null;
 	private ACache aCache;
-	private static final long DELAYTIME = 600L;
+	private static final long DELAY_TIME = 600L;
 	private static final String TAG = "CreateGestureActivity";
 
 	@Override
@@ -104,7 +104,7 @@ public class CreateGestureActivity extends Activity {
 				break;
 			case CONFIRMERROR:
 				lockPatternView.setPattern(LockPatternView.DisplayMode.ERROR);
-				lockPatternView.postClearPatternRunnable(DELAYTIME);
+				lockPatternView.postClearPatternRunnable(DELAY_TIME);
 				break;
 			case CONFIRMCORRECT:
 				saveChosenPattern(pattern);

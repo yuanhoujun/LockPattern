@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/grey_f6f6f6"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/grey_f6f6f6"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/messageTv"
@@ -24,7 +25,15 @@
             android:id="@+id/lockPatternView"
             android:layout_width="@dimen/_270dp"
             android:layout_height="@dimen/_270dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            app:stealth_point="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_10dp"
+            android:text="@string/in_the_top_message"
+            android:layout_height="wrap_content"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -40,6 +49,7 @@
                 android:paddingLeft="@dimen/_5dp"
                 android:paddingRight="@dimen/_5dp"
                 android:text="@string/gesture_forget_gesture"
+                android:textColor="@color/gesture_primary_color"
                 android:textSize="@dimen/_14sp" />
 
         </RelativeLayout>

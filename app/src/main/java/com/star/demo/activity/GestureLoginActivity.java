@@ -34,7 +34,7 @@ public class GestureLoginActivity extends AppCompatActivity {
     Button forgetGestureBtn;
 
     private ACache aCache;
-    private static final long DELAYTIME = 600l;
+    private static final long DELAY_TIME = 600l;
     private byte[] gesturePassword;
 
     @Override
@@ -85,7 +85,7 @@ public class GestureLoginActivity extends AppCompatActivity {
                 break;
             case ERROR:
                 lockPatternView.setPattern(LockPatternView.DisplayMode.ERROR);
-                lockPatternView.postClearPatternRunnable(DELAYTIME);
+                lockPatternView.postClearPatternRunnable(DELAY_TIME);
                 break;
             case CORRECT:
                 lockPatternView.setPattern(LockPatternView.DisplayMode.DEFAULT);

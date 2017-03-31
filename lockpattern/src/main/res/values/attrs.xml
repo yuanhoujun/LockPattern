@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--手势识别器-->
+    <declare-styleable name="LockPatternView">
+        <attr name="stealth_point" format="boolean"/>
+        <attr name="default_color" format="color"/>
+        <attr name="selector_color" format="color"/>
+        <attr name="error_color" format="color"/>
+    </declare-styleable>
+
+    <!--小手势识别器-->
+    <declare-styleable name="LockPatternIndicator">
+        <attr name="idc_default_color" format="color"/>
+        <attr name="idc_selector_color" format="color"/>
+    </declare-styleable>
+
+</resources>

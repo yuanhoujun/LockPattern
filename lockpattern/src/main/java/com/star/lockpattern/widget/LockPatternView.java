@@ -2,6 +2,7 @@ package com.star.lockpattern.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -21,6 +22,8 @@ import java.util.List;
 /**
  * nine block box lock
  * @author Sym
+ *
+ * revamp by wizong @Date 2017-03-31
  */
 public class LockPatternView extends View {
 
@@ -39,7 +42,7 @@ public class LockPatternView extends View {
 	//set delay time
 	private long delayTime = 600L;
 	//set offset to the boundary
-	private int offset = 10;
+	private int offset = 15;
 	//draw view used paint
 	private Paint defaultPaint, selectPaint, errorPaint;
 	private Path trianglePath;
@@ -52,16 +55,31 @@ public class LockPatternView extends View {
 	private static final String TAG = "LockPatternView";
 	private static final double CONSTANT_COS_30 = Math.cos(Math.toRadians(30));
 
+	private boolean mStealthPoint;//Control whether display
+
+	private int mDefaultColor;
+	private int mErrorColor;
+	private int mSelectorColor;
 	public LockPatternView(Context context) {
 		this(context, null);
 	}
-	
+
 	public LockPatternView(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
-	
+
 	public LockPatternView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView, defStyleAttr, 0);
+
+		mStealthPoint = a.getBoolean(R.styleable.LockPatternView_stealth_point, false);
+		mDefaultColor = a.getColor(R.styleable.LockPatternView_default_color, getResources().getColor(R.color.gesture_default_color));
+		mSelectorColor = a.getColor(R.styleable.LockPatternView_selector_color, getResources().getColor(R.color.gesture_primary_color));
+		mErrorColor = a.getColor(R.styleable.LockPatternView_error_color, getResources().getColor(R.color.gesture_error_color));
+
+		a.recycle();
+
 		this.init();
 	}
 
@@ -102,41 +120,53 @@ public class LockPatternView extends View {
 	 * @param canvas
      */
 	private void drawToCanvas(Canvas canvas){
-		
-		for(int i = 0; i< mCells.length; i++){
-			for(int j = 0; j < mCells[i].length; j++){
-				if(mCells[i][j].getStatus() == Cell.STATE_CHECK){
-					selectPaint.setStyle(Style.STROKE);
-					canvas.drawCircle(mCells[i][j].getX(), mCells[i][j].getY(),
-							this.cellRadius, this.selectPaint);
-					selectPaint.setStyle(Style.FILL);
-					canvas.drawCircle(mCells[i][j].getX(), mCells[i][j].getY(),
-							this.cellInnerRadius, this.selectPaint);
-				} else if(mCells[i][j].getStatus() == Cell.STATE_NORMAL){
-					canvas.drawCircle(mCells[i][j].getX(), mCells[i][j].getY(),
-							this.cellRadius, this.defaultPaint);
-				} else if(mCells[i][j].getStatus() == Cell.STATE_CHECK_ERROR){
-					errorPaint.setStyle(Style.STROKE);
-					canvas.drawCircle(mCells[i][j].getX(), mCells[i][j].getY(),
-							this.cellRadius, this.errorPaint);
-					errorPaint.setStyle(Style.FILL);
-					canvas.drawCircle(mCells[i][j].getX(), mCells[i][j].getY(),
-							this.cellInnerRadius, this.errorPaint);
+
+		for (Cell[] mCell : mCells) {
+			for (Cell aMCell : mCell) {
+				if (aMCell.getStatus() == Cell.STATE_CHECK) {
+					if (mStealthPoint) {
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellRadius / 4, this.defaultPaint);
+					} else {
+						selectPaint.setStyle(Style.STROKE);
+
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellRadius, this.selectPaint);
+						selectPaint.setStyle(Style.STROKE);
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellRadius / 1.3f, this.selectPaint);
+					}
+				} else if (aMCell.getStatus() == Cell.STATE_NORMAL) {
+					canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+							this.cellRadius / 4, this.defaultPaint);
+				} else if (aMCell.getStatus() == Cell.STATE_CHECK_ERROR) {
+					if (!mStealthPoint) {
+						errorPaint.setStyle(Style.STROKE);
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellRadius, this.errorPaint);
+						errorPaint.setStyle(Style.FILL);
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellInnerRadius, this.errorPaint);
+					} else {
+						canvas.drawCircle(aMCell.getX(), aMCell.getY(),
+								this.cellInnerRadius, this.errorPaint);
+					}
 				}
 			}
 		}
-		
+
 		if(sCells.size() > 0){
-			//temporary cell: at the beginning the cell is the first of sCells
 			Cell tempCell = sCells.get(0);
-			
+
 			for(int i = 1; i < sCells.size(); i++ ){
 				Cell cell = sCells.get(i);
 				if(cell.getStatus() == Cell.STATE_CHECK) {
 					//drawLineIncludeCircle(tempCell, cell, canvas , selectPaint);
-					drawLine(tempCell, cell, canvas, selectPaint);
+					if (!mStealthPoint) {
+						drawLine(tempCell, cell, canvas, selectPaint);
+					}
 					//drawTriangle(tempCell, cell, canvas, selectPaint);
-					drawNewTriangle(tempCell, cell, canvas, selectPaint);
+//					drawNewTriangle(tempCell, cell, canvas, selectPaint);
 				} else if (cell.getStatus() == Cell.STATE_CHECK_ERROR){
 					//drawLineIncludeCircle(tempCell, cell, canvas, errorPaint);
 					drawLine(tempCell, cell, canvas, errorPaint);
@@ -145,7 +175,7 @@ public class LockPatternView extends View {
 				}
 				tempCell = cell;
 			}
-			
+
 			if(isActionMove  && !isActionUp){
 				//canvas.drawLine(tempCell.getX(), tempCell.getY(), movingX, movingY, selectPaint);
 				this.drawLineFollowFinger(tempCell, canvas, selectPaint);
@@ -188,7 +218,7 @@ public class LockPatternView extends View {
 		this.cellBoxWidth = (this.width - offset * 2)/3;
 		this.cellBoxHeight = (this.height - offset * 2)/3;
 	}
-	
+
 	/**
 	 * initialize nine cells
 	 */
@@ -215,25 +245,25 @@ public class LockPatternView extends View {
 			}
 		}
 	}
-	
+
 	/**
 	 * initialize paints
 	 */
 	private void initPaints(){
 		defaultPaint = new Paint();
-		defaultPaint.setColor(getResources().getColor(R.color.blue_78d2f6));
-		defaultPaint.setStrokeWidth(2.0f);
-		defaultPaint.setStyle(Style.STROKE);
+		defaultPaint.setColor(mDefaultColor);
+//		defaultPaint.setStrokeWidth(2.0f);
+		defaultPaint.setStyle(Style.FILL);
 		defaultPaint.setAntiAlias(true);
-		
+
 		selectPaint = new Paint();
-		selectPaint.setColor(getResources().getColor(R.color.blue_00aaee));
+		selectPaint.setColor(mSelectorColor);
 		selectPaint.setStrokeWidth(3.0f);
 		//selectPaint.setStyle(Style.STROKE);
 		selectPaint.setAntiAlias(true);
-		
+
 		errorPaint = new Paint();
-		errorPaint.setColor(getResources().getColor(R.color.red_f3323b));
+		errorPaint.setColor(mErrorColor);
 		errorPaint.setStrokeWidth(3.0f);
 		//errorPaint.setStyle(Style.STROKE);
 		errorPaint.setAntiAlias(true);
@@ -251,19 +281,6 @@ public class LockPatternView extends View {
 	 */
 	private void initMatrixs() {
 		triangleMatrix = new Matrix();
-	}
-
-	/**
-	 * draw line include circle
-	 * (the line include inside the circle, the method is deprecated)
-	 * @param preCell
-	 * @param nextCell
-	 * @param canvas
-     * @param paint
-     */
-	@Deprecated
-	private void drawLineIncludeCircle(Cell preCell, Cell nextCell, Canvas canvas, Paint paint){
-		canvas.drawLine(preCell.getX(), preCell.getY(), nextCell.getX(), nextCell.getY(), paint);
 	}
 
 	/**
@@ -350,61 +367,6 @@ public class LockPatternView extends View {
 			float y1 = this.cellRadius / distance * (movingY - preCell.getY()) + preCell.getY() ;
 			canvas.drawLine(x1, y1, movingX, movingY, paint);
 		}
-	}
-
-	/**
-	 * draw triangle
-	 * @param preCell the previous selected cell
-	 * @param nextCell the next selected cell
-	 * @param canvas
-     * @param paint
-     */
-	@Deprecated
-	private void drawTriangle(Cell preCell, Cell nextCell, Canvas canvas, Paint paint) {
-		float distance = LockPatternUtil.getDistanceBetweenTwoPoints
-				(preCell.getX(), preCell.getY(), nextCell.getX(), nextCell.getY());
-		float x = this.cellInnerRadius * 2 / distance * (nextCell.getX() - preCell.getX()) + preCell.getX();
-		float y = this.cellInnerRadius * 2 / distance * (nextCell.getY() - preCell.getY()) + preCell.getY();
-
-		float angleX = LockPatternUtil.getAngleLineIntersectX(
-				preCell.getX(), preCell.getY(), nextCell.getX(), nextCell.getY(), distance);
-		float angleY = LockPatternUtil.getAngleLineIntersectY(
-				preCell.getX(), preCell.getY(), nextCell.getX(), nextCell.getY(), distance);
-		float x1, y1, x2, y2;
-		//slide right down
-		if (angleX >= 0 && angleX <= 90 && angleY >=0 && angleY <= 90 ) {
-			x1 = x - (float)(cellInnerRadius * Math.cos(Math.toRadians(angleX - 30)));
-			y1 = y - (float)(cellInnerRadius * Math.sin(Math.toRadians(angleX - 30)));
-			x2 = x - (float)(cellInnerRadius * Math.sin(Math.toRadians(angleY - 30)));
-			y2 = y - (float)(cellInnerRadius * Math.cos(Math.toRadians(angleY - 30)));
-		}
-		//slide right up
-		else if (angleX >= 0 && angleX <= 90 && angleY > 90 && angleY <= 180) {
-			x1 = x - (float)(cellInnerRadius * Math.cos(Math.toRadians(angleX + 30)));
-			y1 = y + (float)(cellInnerRadius * Math.sin(Math.toRadians(angleX + 30)));
-			x2 = x - (float)(cellInnerRadius * Math.sin(Math.toRadians(180 - angleY + 30)));
-			y2 = y + (float)(cellInnerRadius * Math.cos(Math.toRadians(180 - angleY + 30)));
-		}
-		//slide left up
-		else if (angleX > 90 && angleX <= 180 && angleY >= 90 && angleY < 180) {
-			x1 = x + (float)(cellInnerRadius * Math.cos(Math.toRadians(180 - angleX - 30)));
-			y1 = y + (float)(cellInnerRadius * Math.sin(Math.toRadians(180 - angleX - 30)));
-			x2 = x + (float)(cellInnerRadius * Math.sin(Math.toRadians(180 - angleY - 30)));
-			y2 = y + (float)(cellInnerRadius * Math.cos(Math.toRadians(180 - angleY - 30)));
-		}
-		//slide left down
-		else {
-			x1 = x + (float)(cellInnerRadius * Math.cos(Math.toRadians(180 - angleX + 30)));
-			y1 = y - (float)(cellInnerRadius * Math.sin(Math.toRadians(180 - angleX + 30)));
-			x2 = x + (float)(cellInnerRadius * Math.sin(Math.toRadians(angleY + 30)));
-			y2 = y - (float)(cellInnerRadius * Math.cos(Math.toRadians(angleY + 30)));
-		}
-		trianglePath.reset();
-		trianglePath.moveTo(x, y);
-		trianglePath.lineTo(x1, y1);
-		trianglePath.lineTo(x2, y2);
-		trianglePath.close();
-		canvas.drawPath(trianglePath, paint);
 	}
 
 	/**
@@ -522,7 +484,7 @@ public class LockPatternView extends View {
 	}
 
 	/**
-	 * check user's touch moving is or not in the area of cells 
+	 * check user's touch moving is or not in the area of cells
 	 * @param x
 	 * @param y
 	 * @return
@@ -538,7 +500,7 @@ public class LockPatternView extends View {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * add selected cell
 	 * @param cell
@@ -595,6 +557,7 @@ public class LockPatternView extends View {
 		NORMAL,
 		//show selected pattern error
 		ERROR;
+
 	}
 
 	/**
@@ -619,7 +582,6 @@ public class LockPatternView extends View {
 		}
 		this.handleStealthMode();
 	}
-
 	/**
 	 * handle the stealth mode (if true: do not post invalidate; false: post invalidate)
 	 */
@@ -694,28 +656,28 @@ public class LockPatternView extends View {
 	 * callback interface
 	 */
 	public static interface OnPatternListener {
+
 		public void onPatternStart();
+
 		public void onPatternComplete(List<Cell> cells);
 	}
-	
 	public class Cell {
-		
 		private int x;// the x position of circle's center point
+
 		private int y;// the y position of circle's center point
+
 		private int row;// the cell in which row
 		private int column;// the cell in which column
 		private int index;// the cell value
 		private int status = 0;//default status
-
 		//default status
 		public static final int STATE_NORMAL = 0;
 		//checked status
 		public static final int STATE_CHECK = 1;
+
 		//checked error status
 		public static final int STATE_CHECK_ERROR = 2;
-		
 		public Cell(){}
-		
 		public Cell(int x, int y, int row, int column, int index){
 			this.x = x;
 			this.y = y;
@@ -723,7 +685,7 @@ public class LockPatternView extends View {
 			this.column = column;
 			this.index = index;
 		}
-		
+
 		public int getX(){
 			return this.x;
 		}
@@ -731,7 +693,7 @@ public class LockPatternView extends View {
 		public void setX(int x) {
 			this.x = x;
 		}
-		
+
 		public int getY(){
 			return this.y;
 		}
@@ -747,19 +709,50 @@ public class LockPatternView extends View {
 		public int getColumn() {
 			return this.column;
 		}
-		
+
 		public int getIndex(){
 			return this.index;
 		}
-		
+
 		public int getStatus(){
 			return this.status;
 		}
-		
+
 		public void setStatus(int status){
 			this.status = status;
 		}
-		
+
+		public int getDefaultColor() {
+			return mDefaultColor;
+		}
+
+		public void setDefaultColor(int defaultColor) {
+			mDefaultColor = defaultColor;
+		}
+
+		public int getErrorColor() {
+			return mErrorColor;
+		}
+
+		public void setErrorColor(int errorColor) {
+			mErrorColor = errorColor;
+		}
+
+		public int getSelectorColor() {
+			return mSelectorColor;
+		}
+
+		public void setSelectorColor(int selectorColor) {
+			mSelectorColor = selectorColor;
+		}
+
+		public boolean isStealthPoint() {
+			return mStealthPoint;
+		}
+
+		public void setStealthPoint(boolean stealthPoint) {
+			mStealthPoint = stealthPoint;
+		}
 	}
-	
+
 }
