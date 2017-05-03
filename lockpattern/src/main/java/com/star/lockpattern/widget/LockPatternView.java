@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -462,10 +463,30 @@ public class LockPatternView extends View {
 		movingX = ex;
 		movingY = ey;
 		Cell cell = checkSelectCell(ex, ey);
+
+		if(!sCells.isEmpty() && null != cell) {
+			Cell last = sCells.get(sCells.size() - 1);
+			if(last.row != cell.row || last.column != cell.column) {
+				doIntermediatePoint(last, cell);
+			}
+		}
+
 		if(cell != null ){
 			addSelectedCell(cell);
 		}
+
 		this.setPattern(DisplayMode.NORMAL);
+	}
+
+	private void doIntermediatePoint(Cell last, Cell next) {
+		if((last.row + next.row) % 2 == 0 && (last.column + next.column) % 2 == 0) {
+			int row = (last.row + next.row) / 2;
+			int column = (last.column + next.column) / 2;
+
+			Log.e("Cell<<<<", row + "&&&&&" + column);
+
+			addSelectedCell(mCells[row][column]);
+		}
 	}
 
 	/**
