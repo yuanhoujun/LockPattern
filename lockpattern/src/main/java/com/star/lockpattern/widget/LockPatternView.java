@@ -483,8 +483,6 @@ public class LockPatternView extends View {
 			int row = (last.row + next.row) / 2;
 			int column = (last.column + next.column) / 2;
 
-			Log.e("Cell<<<<", row + "&&&&&" + column);
-
 			addSelectedCell(mCells[row][column]);
 		}
 	}
